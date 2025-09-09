@@ -1,108 +1,231 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>circelcuanmv – Hapus Paket</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"/>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
-  <!-- Tambahkan CDN SweetAlert2 -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css"/>
+<!DOCTYPE html><html lang="id"><head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Cek Kuota & Membership Circle</title>
+  <link href="css/bootstrap.min.css" rel="stylesheet">
   <style>
-    :root{--primary:#005eff;--dark:#121212;--darker:#1e1e1e;--card:#2d2d2d;--text:#e0e0e0}
-    body{background:var(--dark);color:var(--text);font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;min-height:100vh;padding-bottom:3rem}
-    .container{max-width:500px;margin-top:2rem}
-    .card{background:var(--card);border:none;border-radius:12px;box-shadow:0 8px 16px rgba(0,0,0,.2)}
-    .card-header{background:linear-gradient(135deg,var(--primary),#004cd4);color:#fff;font-weight:600}
-    .form-control,.form-select{background:var(--darker);color:var(--text);border:1px solid #444;border-radius:10px}
-    .btn-primary,.btn-danger{border:none;border-radius:10px;font-weight:600}
-    .btn-primary{background:linear-gradient(135deg,var(--primary),#004cd4)}
-    .btn-danger{background:#dc3545}
-    .loading-spinner{display:inline-block;width:1rem;height:1rem;border:2px solid rgba(255,255,255,.3);border-radius:50%;border-top-color:#fff;animation:spin 1s linear infinite;margin-right:8px}
-    @keyframes spin{to{transform:rotate(360deg)}}
-    .alert{border-radius:10px;border:none}
-    .text-muted {
-      color: #ffffff !important;
+    :root{ --brand:#006fff; }
+    body{ background:#f7f9fc; }
+    .navbar{ background:var(--brand); }
+    .navbar-brand{ color:#fff!important; font-weight:700; }
+    .card{ border:0; border-radius:1rem; box-shadow:0 8px 22px rgba(0,0,0,.06); }
+    .btn-brand {
+      background: var(--brand);
+      border: 2px solid var(--brand) !important;
+      color: #fff;
+      transition: all 0.2s ease-in-out;
     }
-    .form-label {
-      color: #ffffff !important;
+    .btn-brand:hover { filter:brightness(.95); }
+    .btn-brand:focus,
+    .btn-brand:active,
+    .btn-brand:focus-visible {
+      outline: none !important;
+      border: 2px solid #0056d2 !important;
+      box-shadow: 0 0 0 0.25rem rgba(0,111,255,.3) !important;
+      color: #fff;
     }
-    .form-control {
-      background-color: #ffffff !important;
-      color: #333333 !important;
-      border: 1px solid #cccccc !important;
-    }
+    .muted{ color:#6b7280; }
+    .mini{ font-size:.9rem; }
+    .nav-tabs .nav-link.active{ color:var(--brand); font-weight:600; border-bottom-color: var(--brand); }
+    .nav-tabs .nav-link{ border:none; border-bottom:2px solid transparent; }
+    .progress { height: 24px; border-radius: 12px; overflow: hidden; }
+    .progress-bar { font-weight:600; font-size:.85rem; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="text-center mb-3">
-      <p class="text-muted">Pilih paket yang ingin Anda hapus dari nomor XL/AXIS</p>
+  <nav class="navbar">
+    <div class="container">
+      <span class="navbar-brand">Circle Checker</span>
     </div>
+  </nav>
 
-    <div class="card">
-      <div class="card-header text-center"><h5 class="mb-0"><i class="fas fa-clipboard-list me-2"></i>Hapus Paket xl/axis</h5></div>
-      <div class="card-body">
-        <form id="getPackagesForm">
+  <main class="container my-4">
+    <ul class="nav nav-tabs" role="tablist">
+      <li class="nav-item">
+        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#quota" type="button">Kuota Circle</button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#member" type="button">Membership Circle</button>
+      </li>
+    </ul>
+
+    <div class="tab-content">
+      <!-- Kuota -->
+      <div class="tab-pane fade show active" id="quota">
+        <div class="card p-3 p-md-4 mt-3">
           <div class="mb-3">
-            <label for="nomor" class="form-label">Nomor HP</label>
-            <input type="text" id="nomor" class="form-control" placeholder="0877" required/>
+            <label class="form-label mini">MSISDN (tanpa +)</label>
+            <input id="msisdn" class="form-control form-control-lg" placeholder="628xxxxxxxx" inputmode="numeric">
           </div>
-          <button type="submit" id="getBtn" class="btn btn-primary w-100"><i class="fas fa-search me-2"></i>Cari Paket</button>
-        </form>
+          <div class="d-grid">
+            <button id="btnCheck" class="btn btn-brand btn-lg">Cek Kuota</button>
+          </div>
+          <div id="state" class="mt-3 mini muted"></div>
+          <div id="result" class="mt-3 d-none">
+            <h5 class="mb-3">Hasil Kuota</h5>
+            <p><strong>MSISDN:</strong> <span id="r_msisdn"></span></p>
+            <div class="mb-3">
+              <div class="d-flex justify-content-between mb-1">
+                <span class="mini muted">Sisa Kuota</span>
+                <span id="r_remain"></span>
+              </div>
+              <div class="progress">
+                <div id="r_progress" class="progress-bar" style="width:0%">0%</div>
+              </div>
+            </div>
+            <ul class="list-group">
+              <li class="list-group-item"><strong>Total Kuota:</strong> <span id="r_alloc"></span></li>
+              <li class="list-group-item"><strong>Terpakai:</strong> <span id="r_used"></span></li>
+              <li class="list-group-item"><strong>Bergabung:</strong> <span id="r_join"></span></li>
+              <li class="list-group-item"><strong>Expired:</strong> <span id="r_exp"></span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
 
-        <div id="responseMessage" class="alert mt-3" style="display:none"><pre id="resultText" class="mb-0"></pre></div>
-
-        <form id="deletePackageForm" class="mt-4" style="display:none">
+      <!-- Membership -->
+      <div class="tab-pane fade" id="member">
+        <div class="card p-3 p-md-4 mt-3">
           <div class="mb-3">
-            <label for="paketSelect" class="form-label">Pilih Paket</label>
-            <select id="paketSelect" class="form-select" required></select>
+            <label class="form-label mini">MSISDN (tanpa +)</label>
+            <input id="msisdnMember" class="form-control form-control-lg" placeholder="628xxxxxxxx" inputmode="numeric">
           </div>
-          <button type="submit" id="delBtn" class="btn btn-danger w-100"><i class="fas fa-trash me-2"></i>Hapus Paket</button>
-        </form>
+          <div class="d-grid">
+            <button id="btnMember" class="btn btn-brand btn-lg">Cek Status Membership</button>
+          </div>
+          <div id="stateMember" class="mt-3 mini muted"></div>
+          <div id="resultMember" class="mt-3 d-none">
+            <h5 class="mb-3">Status Membership</h5>
+            <p><strong>MSISDN:</strong> <span id="m_msisdn"></span></p>
+            <p><strong>Status:</strong> <span id="m_status"></span></p>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-  <br>
-  <div class="footer">
-    © 2025 FSTORE INC | 
-    <i class="fas fa-code"></i> by 
-    <i class="fas fa-heart" style="color: #005eff;"></i> circelcuanmv 
-  </div> 
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script>
-    const API_BASE='https://apsapi.biz.id';
-    const TOKEN='Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFAYS5hYSIsImlhdCI6MTc1NDU2MDc0OSwiZXhwIjoxNzU3MTUyNzQ5fQ.LexNiBxFCSZnq-nA05n4qKQfsfFh7NQKOb51gQEfPoE';
-    const getPackagesForm=document.getElementById('getPackagesForm');
-    const deletePackageForm=document.getElementById('deletePackageForm');
-    const responseDiv=document.getElementById('responseMessage');
-    const resultText=document.getElementById('resultText');
-    const paketSelect=document.getElementById('paketSelect');
-    const getBtn=document.getElementById('getBtn');
-    const delBtn=document.getElementById('delBtn');
-    let packages=[];
 
-    getPackagesForm.addEventListener('submit', async e => {
-      e.preventDefault();
-      let nomor = document.getElementById('nomor').value.trim();
-      nomor = nomor.replace(/[-\s]/g, '');
-      if (nomor.startsWith('+628')) {
-        nomor = '628' + nomor.slice(4);
+    <p class="text-center mt-3 mini muted">© Circle Checker</p>
+  </main>
+
+<script src="js/bootstrap.bundle.min.js"></script>
+<script>
+(function(){
+  const QUOTA_ENDPOINT = (msisdn) => `https://leonskennedy.my.id/cekcircle/cek_kuota.php?msisdn=${encodeURIComponent(msisdn)}`;
+  const MEMBERSHIP_ENDPOINT = (msisdn) => `https://leonskennedy.my.id/cekcircle/cek_membership.php?msisdn=${encodeURIComponent(msisdn)}`;
+
+  // ========== Kuota ==========
+  const msisdn = document.getElementById('msisdn');
+  const btnCheck = document.getElementById('btnCheck');
+  const state = document.getElementById('state');
+  const result = document.getElementById('result');
+
+  async function fetchQuota(msisdnVal){
+    state.textContent = 'Mengambil data kuota...';
+    result.classList.add('d-none');
+    try {
+      const res = await fetch(QUOTA_ENDPOINT(msisdnVal));
+      const data = await res.json();
+      //if (!data.ok) throw new Error(data.error || 'Gagal');
+      
+      if (!data.ok) {
+      state.textContent = ''; // kosongkan status kecil
+      result.classList.add('d-none');
+    
+      // hapus error lama kalau ada
+      const oldBox = document.getElementById('errorBox');
+      if (oldBox) oldBox.remove();
+    
+      // bikin alert box
+      const errorBox = document.createElement('div');
+      errorBox.className = 'alert alert-danger mt-3';
+      errorBox.id = 'errorBox';
+      errorBox.innerHTML = data.error; // pakai innerHTML supaya <br> dan <img> tampil
+    
+      state.parentNode.appendChild(errorBox);
+      return;
+    }
+
+      const q = data.quota;
+      const lc = data.lifecycle;
+
+      // pakai allocation.label kalau ada
+      const allocLabel = q.allocation.label || (q.allocation.gb + ' GB');
+
+      document.getElementById('r_msisdn').textContent = data.msisdn;
+      document.getElementById('r_alloc').textContent  = allocLabel;
+      document.getElementById('r_used').textContent   = q.used.gb + ' GB ('+q.usage_pct+'%)';
+      document.getElementById('r_remain').textContent = q.remaining.gb + ' GB';
+      document.getElementById('r_join').textContent   = lc.joined;
+      document.getElementById('r_exp').textContent    = lc.expires;
+
+      // progress bar
+      const bar = document.getElementById('r_progress');
+      bar.style.width = q.usage_pct + '%';
+      bar.textContent = q.usage_pct + '%';
+
+      // dinamis warna
+      const remainPct = 100 - q.usage_pct;
+      bar.classList.remove('bg-success','bg-warning','bg-danger');
+      if (remainPct > 50) {
+        bar.classList.add('bg-success');
+      } else if (remainPct > 20) {
+        bar.classList.add('bg-warning');
+      } else {
+        bar.classList.add('bg-danger');
       }
-      if (!/^(08|628)\d{8,11}$/.test(nomor)) {
-        showResult('❌ Nomor harus diawali 08, 628, atau +628 dan total 10-13 digit.', 'danger');
-        return;
-      }
-      if (nomor.startsWith('628')) {
-        nomor = '08' + nomor.slice(3);
-      }
-      toggleBtn(getBtn, true, 'Cari Paket');
-      hideResult();
-      try {
-        const res = await fetch(`${API_BASE}/pdp`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': TOKEN },
-          body: JSON.stringify({ nomor })
+
+      state.textContent = '';
+      result.classList.remove('d-none');
+    } catch(e){
+      state.textContent = 'Error: '+e.message;
+    }
+  }
+
+  btnCheck.addEventListener('click', ()=> {
+    const v = msisdn.value.trim();
+    if (!/^62\d{6,14}$/.test(v)){
+      state.textContent = 'Masukkan MSISDN valid (diawali 62).';
+      return;
+    }
+    fetchQuota(v);
+  });
+
+  // ========== Membership ==========
+  const msisdnMember = document.getElementById('msisdnMember');
+  const btnMember = document.getElementById('btnMember');
+  const stateMember = document.getElementById('stateMember');
+  const resultMember = document.getElementById('resultMember');
+
+  async function fetchMembership(msisdnVal){
+    stateMember.textContent = 'Mengambil data membership...';
+    resultMember.classList.add('d-none');
+    try {
+      const res = await fetch(MEMBERSHIP_ENDPOINT(msisdnVal));
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error || 'Gagal');
+
+      document.getElementById('m_msisdn').textContent = data.msisdn;
+      document.getElementById('m_status').textContent = data.membership.status_text;
+      document.getElementById('m_status').style.color = data.membership.status_color;
+
+      stateMember.textContent = '';
+      resultMember.classList.remove('d-none');
+    } catch(e){
+      stateMember.textContent = 'Error: '+e.message;
+    }
+  }
+
+  btnMember.addEventListener('click', ()=> {
+    const v = msisdnMember.value.trim();
+    if (!/^62\d{6,14}$/.test(v)){
+      stateMember.textContent = 'Masukkan MSISDN valid (diawali 62).';
+      return;
+    }
+    fetchMembership(v);
+  });
+})();
+</script>
+
+</body></html>          body: JSON.stringify({ nomor })
         });
         const json = await res.json();
         if (!json.quota?.length) throw new Error('Tidak ada paket aktif.');
